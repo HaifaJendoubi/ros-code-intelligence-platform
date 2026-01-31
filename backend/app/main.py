@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 
 # ────────────────────────────────────────────────
-# Modèles Pydantic
+# Modèles Pydantic (pour Swagger clair et validation)
 # ────────────────────────────────────────────────
 
 class UploadResponse(BaseModel):
@@ -63,13 +63,32 @@ class AnalysisResponse(BaseModel):
     warnings: List[str]
 
 
+class GraphNode(BaseModel):
+    id: str
+    label: str
+    type: str  # "node" ou "topic"
+
+
+class GraphEdge(BaseModel):
+    id: str
+    source: str
+    target: str
+    label: str
+    animated: bool = True
+
+
+class GraphResponse(BaseModel):
+    nodes: List[GraphNode]
+    edges: List[GraphEdge]
+
+
 # ────────────────────────────────────────────────
 # FastAPI + CORS
 # ────────────────────────────────────────────────
 
 app = FastAPI(
     title="ROS Code Intelligence Platform",
-    description="Analyse statique de code ROS - détection nœuds/topics/pubs/subs",
+    description="Analyse statique de projets ROS 1 - détection nœuds/topics/pubs/subs + graphe",
     version="0.1.0"
 )
 
@@ -108,6 +127,7 @@ def build_file_tree(path: Path) -> FileNode:
     if is_dir:
         for item in sorted(path.iterdir()):
             child = build_file_tree(item)
+            # Filtrer pour garder seulement les fichiers ROS pertinents
             if child.type == "folder" or child.name.lower().endswith((
                 '.py', '.cpp', '.c', '.h', '.hpp', '.launch', '.xml', '.yaml', '.yml'
             )):
@@ -117,13 +137,13 @@ def build_file_tree(path: Path) -> FileNode:
 
 
 # ────────────────────────────────────────────────
-# Modèle ROS + anti-doublons
+# Modèle ROS interne (anti-doublons + warnings)
 # ────────────────────────────────────────────────
 
 class RosModel:
     def __init__(self):
         self.nodes: List[NodeInfo] = []
-        self.node_names: Set[str] = set()           # clé : évite doublons
+        self.node_names: Set[str] = set()
         self.topics: Dict[str, TopicInfo] = {}
         self.warnings: List[str] = []
 
@@ -146,11 +166,11 @@ class RosModel:
 
 
 # ────────────────────────────────────────────────
-# Filtre fichiers pertinents
+# Filtre fichiers pertinents (ignore wrappers catkin/devel/install)
 # ────────────────────────────────────────────────
 
 def is_relevant_source_file(path: Path) -> bool:
-    name = path.name.lower()
+    name_lower = path.name.lower()
     path_str = str(path).lower()
 
     # Ignorer build/devel/install/log/cache
@@ -165,12 +185,12 @@ def is_relevant_source_file(path: Path) -> bool:
     except:
         pass
 
-    # Accepter extensions ROS
-    return name.endswith(('.py', '.cpp', '.c', '.h', '.hpp', '.launch', '.xml', '.yaml', '.yml'))
+    # Accepter extensions ROS pertinentes
+    return name_lower.endswith(('.py', '.cpp', '.c', '.h', '.hpp', '.launch', '.xml', '.yaml', '.yml'))
 
 
 # ────────────────────────────────────────────────
-# Parser ROS (rospy) - version robuste
+# Parser ROS (rospy) - version robuste et corrigée
 # ────────────────────────────────────────────────
 
 def parse_python_ros_file(filepath: Path, model: RosModel):
@@ -187,7 +207,7 @@ def parse_python_ros_file(filepath: Path, model: RosModel):
 
     current_node = None
 
-    # Détection nœud
+    # Détection nœud (tolérant espaces/guillemets)
     node_match = re.search(r'rospy\s*\.\s*init_node\s*\(\s*["\']([^"\']+)["\']', content, re.IGNORECASE)
     if node_match:
         current_node = node_match.group(1)
@@ -202,14 +222,14 @@ def parse_python_ros_file(filepath: Path, model: RosModel):
         topic, msg_type = match.groups()
         topic = topic.strip()
         msg_type = msg_type.strip()
-        # Normalisation type
-        if not msg_type.startswith('std_msgs/'):
-            msg_type = f"std_msgs/{msg_type}"
+        # Normalisation type (corrige "String" → "std_msgs/String")
+        if 'String' in msg_type and 'std_msgs' not in msg_type:
+            msg_type = 'std_msgs/String'
         if current_node:
             model.add_pub(topic, msg_type, current_node)
             print(f"  → Pub → '{topic}' ({msg_type})")
 
-    # Subscribers
+    # Subscribers (même tolérance)
     for match in re.finditer(
         r'(?:rospy\s*\.\s*)?Subscriber\s*\(\s*["\']([^"\']+)["\']\s*,\s*([^,\s\)]+)',
         content, re.IGNORECASE
@@ -217,13 +237,13 @@ def parse_python_ros_file(filepath: Path, model: RosModel):
         topic, msg_type = match.groups()
         topic = topic.strip()
         msg_type = msg_type.strip()
-        if not msg_type.startswith('std_msgs/'):
-            msg_type = f"std_msgs/{msg_type}"
+        if 'String' in msg_type and 'std_msgs' not in msg_type:
+            msg_type = 'std_msgs/String'
         if current_node:
             model.add_sub(topic, msg_type, current_node)
             print(f"  → Sub → '{topic}' ({msg_type})")
 
-    # Warning absence Rate
+    # Warning absence Rate (best practice)
     if current_node and "while not rospy.is_shutdown()" in content and "rospy.Rate" not in content:
         model.warnings.append(
             f"[BEST PRACTICE] Nœud '{current_node}' ({filepath.name}) : boucle while sans rospy.Rate → CPU élevé"
@@ -306,7 +326,7 @@ async def analyze_project(analysis_id: str):
 
     model = RosModel()
 
-    # Parsing filtré
+    # Parsing filtré des fichiers Python
     for py_file in project_dir.rglob("*.py"):
         parse_python_ros_file(py_file, model)
 
@@ -315,11 +335,11 @@ async def analyze_project(analysis_id: str):
     metrics = {
         "nodes_count": len(model.nodes),
         "topics_count": len(topics_list),
-        "publishers_count": sum(len(set(t.publishers)) for t in topics_list),  # unique !
+        "publishers_count": sum(len(set(t.publishers)) for t in topics_list),
         "subscribers_count": sum(len(set(t.subscribers)) for t in topics_list),
     }
 
-    # Behavior summary amélioré
+    # Behavior summary amélioré et corrigé
     behavior_summary = "Aucun comportement clair détecté."
     if len(model.nodes) >= 2 and len(topics_list) >= 1:
         t = topics_list[0]
@@ -332,7 +352,7 @@ async def analyze_project(analysis_id: str):
 
             behavior_summary = (
                 f"**Comportement détecté : pattern talker/listener classique**\n\n"
-                f"• Nœud(s) émetteur(s) : {pub_str} publie(nt) des messages de type {t.message_type}\n"
+                f"• Nœud(s) émetteur(s) : {pub_str} publie(nt) des messages de type **{t.message_type}**\n"
                 f"  sur le topic **'{t.name}'**\n"
                 f"• Nœud(s) récepteur(s) : {sub_str} s’abonne(nt) et traite(nt) les messages\n\n"
                 "→ Communication unidirectionnelle simple : diffusion périodique de données d’un nœud vers un ou plusieurs autres."
@@ -347,6 +367,49 @@ async def analyze_project(analysis_id: str):
         behavior_summary=behavior_summary,
         warnings=model.warnings
     )
+
+
+@app.get("/api/graph/{analysis_id}", response_model=GraphResponse, tags=["Graph"])
+async def get_communication_graph(analysis_id: str):
+    project_dir = TEMP_EXTRACT_DIR / analysis_id
+    if not project_dir.is_dir():
+        raise HTTPException(404, "Projet non trouvé")
+
+    model = RosModel()
+    for py_file in project_dir.rglob("*.py"):
+        parse_python_ros_file(py_file, model)
+
+    nodes = []
+    edges = []
+
+    # Nœuds ROS
+    for n in model.nodes:
+        nodes.append(GraphNode(id=n.name, label=n.name, type="node"))
+
+    # Topics comme nœuds intermédiaires
+    for idx, topic in enumerate(model.topics.values()):
+        topic_id = f"topic_{idx}"
+        nodes.append(GraphNode(id=topic_id, label=topic.name, type="topic"))
+
+        for pub in set(topic.publishers):
+            edges.append(GraphEdge(
+                id=f"e_pub_{pub}_{topic_id}",
+                source=pub,
+                target=topic_id,
+                label="publishes",
+                animated=True
+            ))
+
+        for sub in set(topic.subscribers):
+            edges.append(GraphEdge(
+                id=f"e_sub_{topic_id}_{sub}",
+                source=topic_id,
+                target=sub,
+                label="subscribes",
+                animated=True
+            ))
+
+    return GraphResponse(nodes=nodes, edges=edges)
 
 
 if __name__ == "__main__":
