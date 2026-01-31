@@ -3,7 +3,7 @@
 Web-based **static analysis tool** for ROS 1 projects.  
 Upload a ZIP archive to get a **structured file tree**, **key ROS metrics**, **communication behavior summary**, **best-practice warnings**, and an **interactive communication graph**.
 
-🔗 [GitHub Repository](https://github.com/YOUR_USERNAME/ros-code-intelligence-platform)
+🔗 [GitHub Repository](https://github.com/HaifaJendoubi/ros-code-intelligence-platform)
 
 ---
 
@@ -37,10 +37,6 @@ Upload a ZIP archive to get a **structured file tree**, **key ROS metrics**, **c
 2. Parse **source files first** (.py, .cpp, .h, .hpp)  
 3. Parse **launch files last** (.launch, .xml) → only add missing nodes  
 4. Cache results → serve **tree / metrics / graph**
-
-### Example Architecture Diagram
-![Architecture Example](docs/architecture.png)  
-> Replace with your real screenshot of frontend/backend architecture
 
 ---
 ```bash
@@ -81,7 +77,7 @@ git add .
 git commit -m "Initial commit: ROS Code Intelligence Platform"
 
 # Link to GitHub repo
-git remote add origin https://github.com/YOUR_USERNAME/ros-code-intelligence-platform.git
+git remote add origin https://github.com/HaifaJendoubi/ros-code-intelligence-platform/tree/main.git
 git branch -M main
 git push -u origin main
 For authentication, use your GitHub username and a Personal Access Token with repo scope.
