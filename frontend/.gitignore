@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.egg-info/
+
+# Node
+node_modules/
+.vite/
+dist/
+frontend/dist/
+
+# Temp
+temp_projects/
+uploads/
+*.zip
+
+# Editors
+.vscode/
+.idea/
