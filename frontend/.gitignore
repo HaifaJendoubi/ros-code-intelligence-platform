@@ -19,3 +19,8 @@ uploads/
 # Editors
 .vscode/
 .idea/
+
+backend/.venv/
+backend/uploads/
+backend/extracted_projects/
+backend/__pycache__/
