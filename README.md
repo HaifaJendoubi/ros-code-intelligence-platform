@@ -43,7 +43,7 @@ Upload a ZIP archive to get a **structured file tree**, **key ROS metrics**, **c
 > Replace with your real screenshot of frontend/backend architecture
 
 ---
-
+```bash
 ## 🗂 Project Structure
 
 ros-code-intelligence-platform/
@@ -65,7 +65,7 @@ ros-code-intelligence-platform/
 ## ⚙️ Setup & Run (Local)
 
 ### Backend
-```bash
+
 cd backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
