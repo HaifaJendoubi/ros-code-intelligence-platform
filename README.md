@@ -506,13 +506,7 @@ test_ros_package/
 └── talker_timer.py
 ```
 
-![Talker-Listener File Tree](./screenshots/file-tree-talker.png)
-*Simple talker-listener tutorial package structure*
-
 **Analysis Results:**
-
-![Talker-Listener Analysis](./screenshots/analysis-talker.png)
-*Analysis results for the classic ROS tutorial package*
 
 | Metric | Count |
 |--------|-------|
