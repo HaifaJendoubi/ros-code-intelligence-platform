@@ -415,6 +415,10 @@ ros-code-intelligence-platform/
 │   ├── 📁 app/
 │   │   ├── main.py              # FastAPI application & parsing logic
 │   │   ├── __init__.py
+│   │   ├── file_tree.py
+│   │   ├── models.py
+│   │   ├── parsers.py
+│   │   ├── config.py 
 │   │   └── 📁 temp/             # Temporary file storage (auto-created)
 │   ├── requirements.txt         # Python dependencies
 │   └── README.md
