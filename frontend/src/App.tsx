@@ -186,7 +186,7 @@ function App() {
         <div className="px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Zap className="w-7 h-7 text-cyan-400" />
-            <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-white">
               ROS Intelligence Hub
             </h1>
           </div>
@@ -317,7 +317,7 @@ function App() {
                 <div className="h-full flex items-center justify-center animate-in fade-in slide-in-from-bottom duration-500">
                   <div className="max-w-3xl w-full">
                     <div className="text-center mb-6">
-                      <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+                      <h2 className="text-3xl font-bold mb-2 text-white">
                         Upload Your ROS Project
                       </h2>
                       <p className="text-gray-400">Drop your ZIP file below to start the analysis</p>
@@ -359,7 +359,7 @@ function App() {
                   {treeData && treeData.length > 0 ? (
                     <div className="h-full flex flex-col">
                       <div className="text-center mb-5">
-                        <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        <h2 className="text-3xl font-bold mb-2 text-white">
                           Project Structure
                         </h2>
                         <p className="text-gray-400 text-sm">Explore your ROS package hierarchy</p>
@@ -415,7 +415,7 @@ function App() {
                   {analysis ? (
                     <div className="pb-6">
                       <div className="text-center mb-5">
-                        <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        <h2 className="text-3xl font-bold mb-2 text-white">
                           Analysis Results
                         </h2>
                         <p className="text-gray-400 text-sm">Comprehensive ROS metrics and insights</p>
@@ -489,7 +489,7 @@ function App() {
                   {graph.nodes.length > 0 ? (
                     <>
                       <div className="text-center mb-5">
-                        <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        <h2 className="text-3xl font-bold mb-2 text-white">
                           Communication Graph
                         </h2>
                         <p className="text-gray-400 text-sm">Visual representation of ROS node interactions</p>
