@@ -607,9 +607,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Haifa Jendoubi**
 
 - 📍 Location: Tunis, Tunisia
-- 📧 Email: haifajendoubi65@gmail.com
+- 📧 Email: haifa.jandoubi22@gmail.com
 - 🔗 GitHub: [@HaifaJendoubi](https://github.com/HaifaJendoubi)
-- 💼 LinkedIn: [Haifa Jendoubi](https://www.linkedin.com/in/haifa-jendoubi)
+- 💼 LinkedIn: [Haifa Jendoubi](https://www.linkedin.com/in/haifa-jendoubi-70b2a61b4/)
 - 📅 Project Date: January 31, 2026
 
 ---
