@@ -26,7 +26,6 @@
 - [Usage](#-usage)
 - [API Documentation](#-api-documentation)
 - [Project Structure](#-project-structure)
-- [Evaluation Highlights](#-evaluation-highlights)
 - [Test Results](#-test-results)
 - [Contributing](#-contributing)
 - [Author](#-author)
@@ -109,21 +108,13 @@ Smart detection of common ROS anti-patterns:
 ![FastAPI Swagger UI](./screenshots/api-docs.png)
 *Complete API documentation with interactive testing capabilities*
 
-### Upload Interface
-![Upload Interface](./screenshots/upload-screen.png)
-*Drag-and-drop ZIP upload with real-time feedback*
-
 ### File Tree View
 ![File Tree](./screenshots/file-tree.png)
 *Interactive project structure visualization*
 
 ### Analysis Dashboard
-![Analysis Results](./screenshots/analysis-dashboard.png)
-*Comprehensive metrics cards showing ROS concepts at a glance*
-
-### Communication Graph
-![Communication Graph](./screenshots/communication-graph.png)
-*Interactive graph showing node relationships and topic flows*
+![Analysis Results](./screenshots/analysis-results.png)
+*Comprehensive metrics showing ROS concepts at a glance*
 
 ---
 
@@ -443,15 +434,104 @@ ros-code-intelligence-platform/
 ├── 📁 screenshots/              # Application screenshots
 │   ├── app-navigation.png
 │   ├── api-docs.png
-│   ├── upload-screen.png
 │   ├── file-tree.png
-│   ├── analysis-dashboard.png
-│   └── communication-graph.png
+│   └── analysis-results.png
 │
 ├── README.md                    # This file
 ├── .gitignore                   # Git ignore rules
 └── LICENSE                      # MIT License
 ```
+
+---
+
+## 📊 Test Results
+
+### Test Package #1: Camera System Package
+
+**Package Structure:**
+```
+test_ros_package/
+├── config/
+│   └── robot_config.yaml
+├── launch/
+│   ├── camera_system.launch
+│   ├── complete_system.launch
+│   └── navigation_system.launch
+├── scripts/
+│   ├── camera_publisher.py
+│   └── image_processor.py
+├── src/
+│   ├── motor_controller.cpp
+│   └── navigation_controller.cpp
+└── package.xml
+```
+
+![Camera Package File Tree](./screenshots/file-tree.png)
+*File structure of the camera system package*
+
+**Analysis Results:**
+
+![Camera Package Analysis](./screenshots/analysis-results.png)
+*Comprehensive analysis showing all ROS metrics*
+
+| Metric | Count |
+|--------|-------|
+| **Nodes** | 8 |
+| **Topics** | 2 |
+| **Publishers** | 2 |
+| **Subscribers** | 1 |
+| **Services** | 0 |
+| **Parameters** | 0 |
+
+**Behavior Summary:**
+> "**Detected ROS Communication:** /camera/image_raw (Image): pub camera_publisher → sub image_processor • /camera/processed (Image): pub image_processor → sub none"
+
+**Key Findings:**
+- ✅ Multi-node robotics system with camera processing
+- ✅ Image pipeline: raw data → processing → output
+- ✅ Well-structured with separate launch files for different subsystems
+- ✅ C++ motor/navigation controllers + Python vision processing
+- ⚠️ Warning: `camera_publisher` missing try/except blocks for error handling
+
+---
+
+### Test Package #2: Talker-Listener (Classic ROS Tutorial)
+
+**Package Structure:**
+```
+001_talker_listener/
+├── listener.py
+├── talker.py
+├── talker_listener.launch
+└── talker_timer.py
+```
+
+![Talker-Listener File Tree](./screenshots/file-tree-talker.png)
+*Simple talker-listener tutorial package structure*
+
+**Analysis Results:**
+
+![Talker-Listener Analysis](./screenshots/analysis-talker.png)
+*Analysis results for the classic ROS tutorial package*
+
+| Metric | Count |
+|--------|-------|
+| **Nodes** | 2 |
+| **Topics** | 1 |
+| **Publishers** | 1 |
+| **Subscribers** | 1 |
+| **Services** | 0 |
+| **Parameters** | 0 |
+
+**Behavior Summary:**
+> "Simple publisher-subscriber pattern demonstrating basic ROS communication. The talker node publishes String messages, which are received by the listener node."
+
+**Key Findings:**
+- ✅ Classic ROS tutorial implementation
+- ✅ Clean publisher-subscriber architecture
+- ✅ Launch file for easy system startup
+- ✅ Timer-based publishing variant included
+- ✅ Minimal, educational codebase
 
 ---
 
@@ -492,65 +572,6 @@ ros-code-intelligence-platform/
 - Error handling and validation
 - RESTful API design
 - Clean, maintainable codebase
-
----
-
-## 📊 Test Results
-
-### Test Package #1: Camera System
-**Package Structure:**
-```
-camera_package/
-├── src/
-│   ├── camera_publisher.py
-│   └── image_processor.py
-└── launch/
-    └── camera_system.launch
-```
-
-**Analysis Results:**
-- ✅ **Nodes**: 4
-- ✅ **Topics**: 2 (`/camera/image`, `/processed/image`)
-- ✅ **Publishers**: 2
-- ✅ **Subscribers**: 1
-- ✅ **Services**: 0
-- ✅ **Parameters**: 3 (`camera_frame_rate`, `image_width`, `image_height`)
-
-**Behavior Summary:**
-> "The camera_publisher node publishes raw sensor_msgs/Image on /camera/image. The image_processor node subscribes to /camera/image, processes the data, and republishes to /processed/image."
-
-**Warnings Detected:**
-- ⚠️ `camera_publisher.py`: Missing `rospy.Rate` in main loop → High CPU usage risk
-- ⚠️ `image_processor.py`: No try/except in callback → Fragile error handling
-
----
-
-### Test Package #2: Talker-Listener
-**Package Structure:**
-```
-talker_listener/
-├── src/
-│   ├── talker.py
-│   └── listener.py
-└── launch/
-    └── demo.launch
-```
-
-**Analysis Results:**
-- ✅ **Nodes**: 2
-- ✅ **Topics**: 1 (`/chatter`)
-- ✅ **Publishers**: 1
-- ✅ **Subscribers**: 1
-- ✅ **Services**: 0
-- ✅ **Parameters**: 1 (`publish_rate`)
-
-**Behavior Summary:**
-> "The talker node publishes std_msgs/String messages to /chatter. The listener node subscribes to /chatter and logs the received messages."
-
-**Warnings Detected:**
-- ✅ All nodes follow best practices
-- ✅ Proper rate control implemented
-- ✅ Error handling present
 
 ---
 
@@ -595,10 +616,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 5. Open a Pull Request
 
 ---
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
