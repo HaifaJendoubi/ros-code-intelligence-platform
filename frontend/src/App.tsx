@@ -4,7 +4,7 @@ import { Tree } from 'react-arborist';
 import { ReactFlow, Background, Controls, MiniMap, BackgroundVariant } from '@xyflow/react';
 import type { Node as RFNode, Edge as RFEdge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Upload, FolderTree, BrainCircuit, Network, AlertTriangle, Zap, Loader2 } from 'lucide-react';
+import { Upload, FolderTree, BrainCircuit, Network, AlertTriangle, Zap, Loader2, CheckCircle2, ChevronRight } from 'lucide-react';
 
 // Types
 interface TreeNode {
@@ -37,6 +37,7 @@ interface TabConfig {
   id: TabId;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
+  step: number;
 }
 
 // Helpers
@@ -111,6 +112,7 @@ function App() {
   const [graph, setGraph] = useState<GraphData>({ nodes: [], edges: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadComplete, setUploadComplete] = useState(false);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -118,6 +120,7 @@ function App() {
 
     setLoading(true);
     setError(null);
+    setUploadComplete(false);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -149,7 +152,8 @@ function App() {
         setGraph(layouted);
       }
 
-      setActiveTab('analysis');
+      setUploadComplete(true);
+      setActiveTab('tree');
     } catch (err: any) {
       console.error('[ERROR]', err);
       setError(err.response?.data?.detail || err.message || 'Unknown error');
@@ -159,270 +163,367 @@ function App() {
   };
 
   const tabs: TabConfig[] = [
-    { id: 'upload', label: 'Upload Project', icon: Upload },
-    { id: 'tree', label: 'File Tree', icon: FolderTree },
-    { id: 'analysis', label: 'Analysis', icon: BrainCircuit },
-    { id: 'graph', label: 'Communication Graph', icon: Network },
+    { id: 'upload', label: 'Upload', icon: Upload, step: 1 },
+    { id: 'tree', label: 'File Tree', icon: FolderTree, step: 2 },
+    { id: 'analysis', label: 'Analysis', icon: BrainCircuit, step: 3 },
+    { id: 'graph', label: 'Graph', icon: Network, step: 4 },
   ];
 
+  const getCurrentStep = () => {
+    const currentTab = tabs.find(t => t.id === activeTab);
+    return currentTab ? currentTab.step : 1;
+  };
+
+  const isTabEnabled = (tabId: TabId) => {
+    if (tabId === 'upload') return true;
+    return uploadComplete;
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-indigo-950 text-gray-100">
-      {/* Header - Centré */}
-      <header className="bg-black/80 backdrop-blur-xl border-b border-cyan-500/30 shadow-xl">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Zap className="w-10 h-10 text-cyan-400 animate-pulse" />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+    <div className="h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-100 flex flex-col overflow-hidden">
+      {/* Compact Header */}
+      <header className="flex-shrink-0 bg-slate-900/95 backdrop-blur-xl border-b border-cyan-500/20 shadow-2xl">
+        <div className="px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Zap className="w-7 h-7 text-cyan-400" />
+            <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
               ROS Intelligence Hub
             </h1>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-            <span>Online • ROS 1 Analyzer</span>
+          
+          <div className="flex items-center gap-4">
+            <div className="px-3 py-1.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg backdrop-blur-sm">
+              <span className="text-cyan-300 font-semibold text-sm">
+                Step {getCurrentStep()}/4
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-gray-300 text-sm">Online</span>
+            </div>
           </div>
+        </div>
+        
+        {/* Thin Progress Bar */}
+        <div className="h-0.5 bg-slate-800">
+          <div 
+            className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 transition-all duration-700 ease-out shadow-lg shadow-cyan-500/50"
+            style={{ width: `${(getCurrentStep() / 4) * 100}%` }}
+          />
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-96px)] max-w-[1920px] mx-auto">
-        {/* Sidebar - Largeur fixe */}
-        <div className="w-64 bg-black/70 backdrop-blur-lg border-r border-cyan-500/20 p-6 flex flex-col gap-4">
-          <h2 className="text-xl font-bold text-cyan-400 mb-6">Navigation</h2>
-          {tabs.map(tab => {
-            const IconComponent = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-3 p-4 rounded-xl transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-gradient-to-r from-cyan-600/40 to-purple-600/40 border-l-4 border-cyan-400 text-white shadow-md'
-                    : 'hover:bg-gray-800/50 text-gray-300'
-                }`}
-              >
-                <IconComponent className="w-6 h-6" />
-                {tab.label}
-              </button>
-            );
-          })}
+      {/* Main Content - Flex Row */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Compact Sidebar */}
+        <aside className="w-52 flex-shrink-0 bg-slate-900/80 backdrop-blur-lg border-r border-slate-700/50">
+          <div className="h-full flex flex-col p-4">
+            {/* Navigation */}
+            <nav className="flex-1 space-y-1.5">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                const enabled = isTabEnabled(tab.id);
+                const isCompleted = uploadComplete && tab.step < getCurrentStep();
 
-          {/* Debug Info */}
-          <div className="mt-auto pt-4 border-t border-gray-700 text-xs text-gray-500">
-            <p>Tree: {treeData ? '✓' : '✗'}</p>
-            <p>Analysis: {analysis ? '✓' : '✗'}</p>
-            <p>Graph: {graph.nodes.length} nodes, {graph.edges.length} edges</p>
-          </div>
-        </div>
-
-        {/* Main Content - Centré avec max-width */}
-        <main className="flex-1 overflow-auto">
-          <div className="max-w-6xl mx-auto px-8 py-8">
-            {loading && (
-              <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-                <div className="text-center">
-                  <Loader2 className="w-16 h-16 text-cyan-400 animate-spin mx-auto mb-4" />
-                  <p className="text-xl text-cyan-300">Analyzing ROS Package...</p>
-                </div>
-              </div>
-            )}
-
-            {error && (
-              <div className="bg-red-900/60 border border-red-500 text-red-100 p-6 rounded-xl mb-8">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-6 h-6" />
-                  <span>{error}</span>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'upload' && (
-              <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-                <div className="w-full max-w-3xl">
-                  <h2 className="text-4xl font-bold text-center mb-12 text-cyan-300">
-                    Upload Your ROS Project
-                  </h2>
-
-                  <label className="block cursor-pointer">
-                    <div className="border-4 border-dashed border-cyan-500/50 rounded-3xl p-20 text-center hover:border-cyan-400 transition-all hover:shadow-[0_0_30px_rgba(6,182,212,0.3)]">
-                      <input type="file" accept=".zip" onChange={handleUpload} className="hidden" />
-                      <Upload className="w-24 h-24 text-cyan-400 mx-auto mb-6" />
-                      <p className="text-2xl font-bold text-cyan-300 mb-4">
-                        Drag & Drop or Click to Upload ZIP
-                      </p>
-                      <p className="text-gray-400">ROS 1 packages only • Max 100MB</p>
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => enabled && setActiveTab(tab.id)}
+                    disabled={!enabled}
+                    className={`
+                      w-full group relative flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-all duration-300
+                      ${isActive 
+                        ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20' 
+                        : enabled
+                          ? 'hover:bg-slate-800/60 text-gray-400 hover:text-cyan-300 border border-transparent hover:border-slate-700'
+                          : 'opacity-30 cursor-not-allowed text-gray-600 border border-transparent'
+                      }
+                    `}
+                  >
+                    {/* Step Number Badge */}
+                    <div className={`
+                      flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                      ${isActive 
+                        ? 'bg-cyan-500/30 text-cyan-300' 
+                        : isCompleted
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-slate-800 text-gray-500'
+                      }
+                    `}>
+                      {isCompleted ? <CheckCircle2 className="w-3.5 h-3.5" /> : tab.step}
                     </div>
-                  </label>
+                    
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-cyan-400' : ''}`} />
+                    
+                    <span className={`text-sm font-medium flex-1 text-left ${isActive ? 'text-cyan-300' : ''}`}>
+                      {tab.label}
+                    </span>
+                    
+                    {isActive && (
+                      <ChevronRight className="w-4 h-4 text-cyan-400 animate-pulse" />
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Status Card */}
+            {uploadComplete && (
+              <div className="mt-auto p-3 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-green-400 text-xs mb-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span className="font-semibold">Project Loaded</span>
+                </div>
+                <p className="text-xs text-gray-400">Ready to explore</p>
+              </div>
+            )}
+          </div>
+        </aside>
+
+        {/* Main Content Area - Full Height */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="h-full px-8 py-6">
+            {/* Error Display */}
+            {error && (
+              <div className="mb-6 p-5 bg-red-950/50 border border-red-500/30 rounded-xl animate-in slide-in-from-top">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="text-base font-bold text-red-300 mb-1">Upload Error</h3>
+                    <p className="text-sm text-red-200">{error}</p>
+                  </div>
                 </div>
               </div>
             )}
 
-            {activeTab === 'tree' && treeData && treeData.length > 0 && (
-              <div>
-                <h2 className="text-3xl font-bold mb-8 text-cyan-300 text-center">Project Structure</h2>
-                <div className="bg-black/60 rounded-2xl p-6 border border-cyan-500/20">
-                  <div className="h-[70vh] overflow-auto">
-                    <Tree
-                      data={treeData}
-                      openByDefault={true}
-                      width="100%"
-                      height={600}
-                      indent={24}
-                      rowHeight={32}
-                    >
-                      {(props: {
-                        node: { isLeaf: boolean; isOpen: boolean; data: { name: string } };
-                        style: React.CSSProperties;
-                        dragHandle: React.Ref<HTMLDivElement> | undefined;
-                      }) => (
-                        <div
-                          style={props.style}
-                          ref={props.dragHandle}
-                          className="flex items-center gap-2 text-gray-200 hover:text-cyan-300 cursor-pointer"
-                        >
-                          <span>{props.node.isLeaf ? '📄' : props.node.isOpen ? '📂' : '📁'}</span>
-                          <span>{props.node.data.name}</span>
+            {/* Loading Overlay */}
+            {loading && (
+              <div className="mb-6 p-6 bg-cyan-950/50 border border-cyan-500/30 rounded-xl animate-pulse">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
+                  <div>
+                    <p className="text-base font-semibold text-cyan-300">Processing your project...</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Analyzing ROS nodes and communication flows</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tab Content */}
+            <div className="h-full">
+              {/* Upload Tab */}
+              {activeTab === 'upload' && (
+                <div className="h-full flex items-center justify-center animate-in fade-in slide-in-from-bottom duration-500">
+                  <div className="max-w-3xl w-full">
+                    <div className="text-center mb-6">
+                      <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        Upload Your ROS Project
+                      </h2>
+                      <p className="text-gray-400">Drop your ZIP file below to start the analysis</p>
+                    </div>
+
+                    <label className="block cursor-pointer group">
+                      <div className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 border-2 border-dashed border-cyan-500/40 rounded-2xl p-20 text-center transition-all duration-300 hover:border-cyan-400/80 hover:bg-slate-900/50 hover:shadow-2xl hover:shadow-cyan-500/20 backdrop-blur-xl">
+                        <input type="file" accept=".zip" onChange={handleUpload} className="hidden" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <Upload className="relative w-20 h-20 text-cyan-400 mx-auto mb-5 group-hover:scale-110 transition-transform duration-300" />
+                        <p className="relative text-xl font-bold text-cyan-300 mb-2">
+                          Drag & Drop or Click to Upload
+                        </p>
+                        <p className="relative text-sm text-gray-400">ROS 1 packages • ZIP format • Max 100MB</p>
+                      </div>
+                    </label>
+
+                    {/* Quick Steps */}
+                    <div className="grid grid-cols-3 gap-3 mt-6">
+                      {['Upload ZIP', 'Auto Analysis', 'View Results'].map((text, i) => (
+                        <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-3 text-center backdrop-blur-sm">
+                          <div className={`
+                            w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold
+                            ${i === 0 ? 'bg-cyan-500/20 text-cyan-400' : i === 1 ? 'bg-purple-500/20 text-purple-400' : 'bg-green-500/20 text-green-400'}
+                          `}>
+                            {i + 1}
+                          </div>
+                          <p className="text-xs text-gray-300">{text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* File Tree Tab */}
+              {activeTab === 'tree' && (
+                <div className="h-full animate-in fade-in slide-in-from-bottom duration-500">
+                  {treeData && treeData.length > 0 ? (
+                    <div className="h-full flex flex-col">
+                      <div className="text-center mb-5">
+                        <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+                          Project Structure
+                        </h2>
+                        <p className="text-gray-400 text-sm">Explore your ROS package hierarchy</p>
+                      </div>
+
+                      <div className="flex-1 bg-slate-900/60 rounded-xl border border-slate-700/50 overflow-hidden backdrop-blur-sm">
+                        <div className="h-full p-4">
+                          <div className="h-full overflow-auto rounded-lg bg-slate-950/50 p-3">
+                            <Tree
+                              data={treeData}
+                              openByDefault={true}
+                              width="100%"
+                              height={600}
+                              indent={20}
+                              rowHeight={32}
+                            >
+                              {(props: {
+                                node: { isLeaf: boolean; isOpen: boolean; data: { name: string } };
+                                style: React.CSSProperties;
+                                dragHandle: React.Ref<HTMLDivElement> | undefined;
+                              }) => (
+                                <div
+                                  style={props.style}
+                                  ref={props.dragHandle}
+                                  className="flex items-center gap-2.5 text-gray-300 hover:text-cyan-300 hover:bg-cyan-500/10 px-2.5 py-1 rounded-md cursor-pointer transition-all duration-200"
+                                >
+                                  <span className="text-base">
+                                    {props.node.isLeaf ? '📄' : props.node.isOpen ? '📂' : '📁'}
+                                  </span>
+                                  <span className="text-sm font-medium">{props.node.data.name}</span>
+                                </div>
+                              )}
+                            </Tree>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <FolderTree className="w-20 h-20 text-slate-600 mx-auto mb-4 opacity-50" />
+                        <p className="text-xl text-gray-400 mb-1">No project uploaded</p>
+                        <p className="text-sm text-gray-500">Upload a ZIP file to see the structure</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Analysis Tab */}
+              {activeTab === 'analysis' && (
+                <div className="h-full overflow-y-auto animate-in fade-in slide-in-from-bottom duration-500">
+                  {analysis ? (
+                    <div className="pb-6">
+                      <div className="text-center mb-5">
+                        <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+                          Analysis Results
+                        </h2>
+                        <p className="text-gray-400 text-sm">Comprehensive ROS metrics and insights</p>
+                      </div>
+
+                      {/* Compact Metrics Grid */}
+                      <div className="grid grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+                        {[
+                          { label: 'Nodes', value: analysis.metrics.nodes_count, color: 'cyan' },
+                          { label: 'Topics', value: analysis.metrics.topics_count, color: 'purple' },
+                          { label: 'Publishers', value: analysis.metrics.publishers_count, color: 'green' },
+                          { label: 'Subscribers', value: analysis.metrics.subscribers_count, color: 'red' },
+                          { label: 'Services', value: analysis.metrics.services_count ?? 0, color: 'indigo' },
+                          { label: 'Parameters', value: analysis.metrics.parameters_count ?? 0, color: 'amber' },
+                        ].map((metric, i) => (
+                          <div key={i} className={`
+                            bg-gradient-to-br from-${metric.color}-900/60 to-${metric.color}-800/60 
+                            p-4 rounded-xl border border-${metric.color}-500/30 text-center 
+                            hover:scale-105 transition-transform duration-300 backdrop-blur-sm
+                          `}>
+                            <p className="text-xs text-gray-300 mb-1.5 uppercase tracking-wider font-semibold">{metric.label}</p>
+                            <p className="text-4xl font-bold text-white">{metric.value}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Behavior Summary */}
+                      <div className="bg-slate-900/60 rounded-xl p-6 border border-slate-700/50 mb-6 backdrop-blur-sm">
+                        <h3 className="text-lg font-bold text-cyan-300 mb-3 flex items-center gap-2">
+                          <BrainCircuit className="w-5 h-5" />
+                          Behavior Summary
+                        </h3>
+                        <p className="text-gray-200 leading-relaxed text-sm whitespace-pre-wrap">
+                          {analysis.behavior_summary || 'No behavior summary available.'}
+                        </p>
+                      </div>
+
+                      {/* Warnings */}
+                      {analysis.warnings?.length > 0 && (
+                        <div className="bg-amber-950/40 border border-amber-500/30 rounded-xl p-6 backdrop-blur-sm">
+                          <h3 className="text-lg font-bold text-amber-300 mb-4 flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5" />
+                            Warnings & Best Practices
+                          </h3>
+                          <ul className="space-y-3">
+                            {analysis.warnings.map((warning: string, index: number) => (
+                              <li key={index} className="flex items-start gap-3 text-amber-100 bg-amber-950/30 p-3 rounded-lg text-sm">
+                                <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-400" />
+                                <span>{warning}</span>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
                       )}
-                    </Tree>
-                  </div>
-
-                  <details className="mt-4 text-xs">
-                    <summary className="text-gray-500 cursor-pointer">Debug: Raw Tree Data</summary>
-                    <pre className="text-gray-400 overflow-auto max-h-40 mt-2">
-                      {JSON.stringify(treeData, null, 2)}
-                    </pre>
-                  </details>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'tree' && (!treeData || treeData.length === 0) && (
-              <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-                <div className="text-center">
-                  <FolderTree className="w-24 h-24 text-gray-600 mx-auto mb-6" />
-                  <p className="text-xl text-gray-400">No project uploaded yet</p>
-                  <p className="text-gray-500 mt-2">Upload a ZIP file to see the project structure</p>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'analysis' && analysis && (
-              <div>
-                <h2 className="text-3xl font-bold mb-8 text-cyan-300 text-center">Analysis Results</h2>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
-                  <div className="bg-gradient-to-br from-cyan-900/80 to-cyan-700/80 p-6 rounded-2xl shadow-lg border border-cyan-500/30 text-center hover:scale-105 transition-transform">
-                    <p className="text-lg text-cyan-200 mb-1">Nodes</p>
-                    <p className="text-5xl font-bold text-white">{analysis.metrics.nodes_count}</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-purple-900/80 to-purple-700/80 p-6 rounded-2xl shadow-lg border border-purple-500/30 text-center hover:scale-105 transition-transform">
-                    <p className="text-lg text-purple-200 mb-1">Topics</p>
-                    <p className="text-5xl font-bold text-white">{analysis.metrics.topics_count}</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-green-900/80 to-green-700/80 p-6 rounded-2xl shadow-lg border border-green-500/30 text-center hover:scale-105 transition-transform">
-                    <p className="text-lg text-green-200 mb-1">Publishers</p>
-                    <p className="text-5xl font-bold text-white">{analysis.metrics.publishers_count}</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-red-900/80 to-red-700/80 p-6 rounded-2xl shadow-lg border border-red-500/30 text-center hover:scale-105 transition-transform">
-                    <p className="text-lg text-red-200 mb-1">Subscribers</p>
-                    <p className="text-5xl font-bold text-white">{analysis.metrics.subscribers_count}</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-indigo-900/80 to-indigo-700/80 p-6 rounded-2xl shadow-lg border border-indigo-500/30 text-center hover:scale-105 transition-transform">
-                    <p className="text-lg text-indigo-200 mb-1">Services</p>
-                    <p className="text-5xl font-bold text-white">{analysis.metrics.services_count ?? 0}</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-amber-900/80 to-amber-700/80 p-6 rounded-2xl shadow-lg border border-amber-500/30 text-center hover:scale-105 transition-transform">
-                    <p className="text-lg text-amber-200 mb-1">Parameters</p>
-                    <p className="text-5xl font-bold text-white">{analysis.metrics.parameters_count ?? 0}</p>
-                  </div>
-                </div>
-
-                <div className="bg-black/60 rounded-2xl p-8 border border-cyan-500/20 mb-10">
-                  <h3 className="text-2xl font-bold text-cyan-300 mb-4 flex items-center gap-3">
-                    <BrainCircuit className="w-7 h-7" />
-                    Behavior Summary
-                  </h3>
-                  <p className="text-gray-200 leading-relaxed whitespace-pre-wrap">
-                    {analysis.behavior_summary || 'No behavior summary available.'}
-                  </p>
-                </div>
-
-                {analysis.warnings?.length > 0 && (
-                  <div className="bg-amber-950/50 border border-amber-500/30 rounded-2xl p-8">
-                    <h3 className="text-2xl font-bold text-amber-300 mb-4 flex items-center gap-3">
-                      <AlertTriangle className="w-7 h-7" />
-                      Warnings & Best Practices
-                    </h3>
-                    <ul className="space-y-4 text-amber-100">
-                      {analysis.warnings.map((warning: string, index: number) => (
-                        <li key={index} className="flex items-start gap-4">
-                          <AlertTriangle className="w-6 h-6 mt-1 flex-shrink-0" />
-                          {warning}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'analysis' && !analysis && (
-              <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-                <div className="text-center">
-                  <BrainCircuit className="w-24 h-24 text-gray-600 mx-auto mb-6" />
-                  <p className="text-xl text-gray-400">No analysis available</p>
-                  <p className="text-gray-500 mt-2">Upload a ZIP file to see the analysis</p>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'graph' && graph.nodes.length > 0 && (
-              <div>
-                <h2 className="text-3xl font-bold mb-8 text-cyan-300 text-center">Communication Graph</h2>
-                <div className="bg-black/60 rounded-2xl border border-cyan-500/20 overflow-hidden">
-                  <div className="h-[75vh]">
-                    <ReactFlow
-                      nodes={graph.nodes}
-                      edges={graph.edges}
-                      fitView
-                      minZoom={0.2}
-                      maxZoom={2}
-                    >
-                      <Background variant={BackgroundVariant.Dots} />
-                      <Controls />
-                      <MiniMap />
-                    </ReactFlow>
-                  </div>
-
-                  <details className="p-4 text-xs border-t border-gray-700">
-                    <summary className="text-gray-500 cursor-pointer">Debug: Graph Data</summary>
-                    <div className="mt-2 space-y-2">
-                      <div>
-                        <p className="text-gray-400">Nodes ({graph.nodes.length}):</p>
-                        <pre className="text-gray-400 overflow-auto max-h-40">
-                          {JSON.stringify(graph.nodes, null, 2)}
-                        </pre>
-                      </div>
-                      <div>
-                        <p className="text-gray-400">Edges ({graph.edges.length}):</p>
-                        <pre className="text-gray-400 overflow-auto max-h-40">
-                          {JSON.stringify(graph.edges, null, 2)}
-                        </pre>
+                    </div>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <BrainCircuit className="w-20 h-20 text-slate-600 mx-auto mb-4 opacity-50" />
+                        <p className="text-xl text-gray-400 mb-1">No analysis available</p>
+                        <p className="text-sm text-gray-500">Upload a ZIP file first</p>
                       </div>
                     </div>
-                  </details>
+                  )}
                 </div>
-              </div>
-            )}
+              )}
 
-            {activeTab === 'graph' && graph.nodes.length === 0 && (
-              <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-                <div className="text-center">
-                  <Network className="w-24 h-24 text-gray-600 mx-auto mb-6" />
-                  <p className="text-xl text-gray-400">No graph data available</p>
-                  <p className="text-gray-500 mt-2">Upload a ZIP file to see the communication graph</p>
+              {/* Graph Tab */}
+              {activeTab === 'graph' && (
+                <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom duration-500">
+                  {graph.nodes.length > 0 ? (
+                    <>
+                      <div className="text-center mb-5">
+                        <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+                          Communication Graph
+                        </h2>
+                        <p className="text-gray-400 text-sm">Visual representation of ROS node interactions</p>
+                      </div>
+
+                      <div className="flex-1 bg-slate-900/60 rounded-xl border border-slate-700/50 overflow-hidden backdrop-blur-sm">
+                        <ReactFlow
+                          nodes={graph.nodes}
+                          edges={graph.edges}
+                          fitView
+                          minZoom={0.2}
+                          maxZoom={2}
+                        >
+                          <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#1e293b" />
+                          <Controls />
+                          <MiniMap 
+                            nodeColor={(node) => node.style?.background as string || '#3b82f6'}
+                            maskColor="rgba(15, 23, 42, 0.8)"
+                          />
+                        </ReactFlow>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <Network className="w-20 h-20 text-slate-600 mx-auto mb-4 opacity-50" />
+                        <p className="text-xl text-gray-400 mb-1">No graph available</p>
+                        <p className="text-sm text-gray-500">Upload a ZIP file first</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </main>
       </div>
