@@ -27,6 +27,7 @@
 - [API Documentation](#-api-documentation)
 - [Project Structure](#-project-structure)
 - [Test Results](#-test-results)
+- [Recent Updates](#-recent-updates)
 - [Contributing](#-contributing)
 - [Author](#-author)
 
@@ -41,6 +42,7 @@
 - 🧠 **AI-powered behavior analysis** and communication flow summaries
 - ⚠️ **Best practice warnings** and code quality recommendations
 - 🎨 **Beautiful communication graph** showing node interactions
+- 📈 **Step-by-step progress tracking** with visual indicators
 
 Perfect for ROS developers, researchers, and teams looking to understand, document, or improve their robotics projects.
 
@@ -89,20 +91,29 @@ Smart detection of common ROS anti-patterns:
 - Animated edges showing data flow
 - Node type color coding (ROS nodes vs. Topics)
 
-### 🎨 **Modern UI/UX**
-- Clean, professional dark theme
+### 🎨 **Modern UI/UX** (Updated!)
+- **Optimized compact layout** - Better space utilization
+- **Step-by-step progress tracking** (Step 1/4, 2/4, 3/4, 4/4)
+- **Visual progress bar** with smooth animations
+- **Smart tab navigation** with enabled/disabled states
+- **Completion indicators** with checkmarks
+- Clean, professional dark theme with cyan/blue/purple gradients
 - Responsive design for all screen sizes
 - Smooth animations and transitions
-- Intuitive tab-based navigation
 - Real-time status indicators
+- Professional metrics dashboard
 
 ---
 
 ## 📸 Screenshots
 
-### Main Interface - Navigation
-![Application Navigation](./screenshots/app-navigation.png)
-*Modern sidebar navigation with status indicators for uploaded projects*
+### Main Interface - Optimized Layout
+![Application Navigation](./screenshots/app-navigation-optimized.png)
+*Compact sidebar with step tracking and progress indicators*
+
+### Upload Interface
+![Upload Screen](./screenshots/upload-interface.png)
+*Modern drag-and-drop interface with workflow guide*
 
 ### API Documentation
 ![FastAPI Swagger UI](./screenshots/api-docs.png)
@@ -115,6 +126,10 @@ Smart detection of common ROS anti-patterns:
 ### Analysis Dashboard
 ![Analysis Results](./screenshots/analysis-results.png)
 *Comprehensive metrics showing ROS concepts at a glance*
+
+### Communication Graph
+![Communication Graph](./screenshots/communication-graph.png)
+*Visual representation of ROS node interactions*
 
 ---
 
@@ -169,6 +184,7 @@ Smart detection of common ROS anti-patterns:
 - **@xyflow/react**: Interactive node-based UI
 - **axios**: HTTP client for API communication
 - **lucide-react**: Beautiful icon library
+- **framer-motion**: Smooth animations (optional)
 
 #### Backend
 - **FastAPI**: Modern, fast Python web framework
@@ -189,11 +205,12 @@ Smart detection of common ROS anti-patterns:
 | React | 19.x | UI Framework |
 | TypeScript | 5.x | Type Safety |
 | Vite | 6.x | Build Tool |
-| Tailwind CSS | 3.4.x | Styling |
+| Tailwind CSS | 4.x | Styling |
 | React Flow | 12.x | Graph Visualization |
 | React Arborist | 3.4.x | Tree Component |
 | Axios | 1.7.x | HTTP Client |
-| Lucide React | 0.460.x | Icons |
+| Lucide React | 0.563.x | Icons |
+| Framer Motion | 12.x | Animations |
 
 ### Backend
 
@@ -270,27 +287,29 @@ Frontend will be available at: `http://localhost:5173`
 
 ### Using the Application
 
-1. **Upload Project**
-   - Navigate to the Upload tab
-   - Drag and drop your ROS project ZIP file
-   - Or click to browse and select
+#### **Step 1: Upload Project**
+- Navigate to the Upload tab (Step 1/4)
+- Drag and drop your ROS project ZIP file
+- Or click to browse and select
+- Wait for automatic processing
 
-2. **View File Tree**
-   - Click the "File Tree" tab
-   - Explore your project structure
-   - Expand/collapse directories
+#### **Step 2: View File Tree**
+- Automatically redirected after upload
+- Click the "File Tree" tab (Step 2/4)
+- Explore your project structure
+- Expand/collapse directories
 
-3. **Analyze Metrics**
-   - Click the "Analysis" tab
-   - View ROS metrics cards
-   - Read behavior summary
-   - Check warnings and recommendations
+#### **Step 3: Analyze Metrics**
+- Click the "Analysis" tab (Step 3/4)
+- View ROS metrics cards
+- Read behavior summary
+- Check warnings and recommendations
 
-4. **Explore Communication Graph**
-   - Click the "Communication Graph" tab
-   - Interact with the node graph
-   - Zoom and pan to explore
-   - View node relationships
+#### **Step 4: Explore Communication Graph**
+- Click the "Communication Graph" tab (Step 4/4)
+- Interact with the node graph
+- Zoom and pan to explore
+- View node relationships
 
 ---
 
@@ -425,7 +444,7 @@ ros-code-intelligence-platform/
 │
 ├── 📁 frontend/
 │   ├── 📁 src/
-│   │   ├── App.tsx              # Main React component
+│   │   ├── App.tsx              # Main React component (optimized)
 │   │   ├── main.tsx             # Entry point
 │   │   └── index.css            # Global styles (Tailwind)
 │   ├── 📁 public/               # Static assets
@@ -436,10 +455,12 @@ ros-code-intelligence-platform/
 │   └── tsconfig.json            # TypeScript configuration
 │
 ├── 📁 screenshots/              # Application screenshots
-│   ├── app-navigation.png
+│   ├── app-navigation-optimized.png
+│   ├── upload-interface.png
 │   ├── api-docs.png
 │   ├── file-tree.png
-│   └── analysis-results.png
+│   ├── analysis-results.png
+│   └── communication-graph.png
 │
 ├── README.md                    # This file
 ├── .gitignore                   # Git ignore rules
@@ -470,13 +491,7 @@ test_ros_package/
 └── package.xml
 ```
 
-![Camera Package File Tree](./screenshots/file-tree.png)
-*File structure of the camera system package*
-
 **Analysis Results:**
-
-![Camera Package Analysis](./screenshots/analysis-results.png)
-*Comprehensive analysis showing all ROS metrics*
 
 | Metric | Count |
 |--------|-------|
@@ -533,6 +548,37 @@ test_ros_package/
 
 ---
 
+## 🆕 Recent Updates
+
+### Version 2.0 - Frontend Optimization (February 2026)
+
+#### **Major UI/UX Improvements**
+- ✨ **Optimized Layout**: Reduced sidebar width from 256px to 208px (+20% more content space)
+- 📊 **Step Tracking**: Added visual progress indicator showing "Step 1/4, 2/4, 3/4, 4/4"
+- 📈 **Progress Bar**: Smooth animated gradient progress bar in header
+- ✅ **Smart Navigation**: Tabs auto-enable/disable based on upload status
+- 🎯 **Completion Indicators**: Green checkmarks show completed steps
+- 🎨 **Compact Design**: Better space utilization with optimized padding
+- 💫 **Smooth Animations**: Enhanced transitions and hover effects
+- 🌈 **Modern Gradients**: Cyan → Blue → Purple color scheme
+- 📱 **Responsive**: Improved mobile and tablet layouts
+
+#### **Technical Improvements**
+- Flexbox-based layout for better space management
+- Reduced header height from 96px to 56px
+- Optimized component sizes and spacing
+- Better vertical space utilization
+- Improved accessibility with focus states
+- Custom scrollbar styling
+
+#### **Performance Enhancements**
+- Faster rendering with optimized React components
+- Reduced bundle size with tree-shaking
+- Better animation performance
+- Improved loading states
+
+---
+
 ## 🔬 Evaluation Highlights
 
 ### 1. **Robotics & ROS Understanding** ⭐⭐⭐⭐⭐
@@ -556,12 +602,13 @@ test_ros_package/
 - Code quality assessment
 
 ### 4. **UI/UX Design** ⭐⭐⭐⭐⭐
-- Clean, modern dark theme with cyan accents
-- Responsive layout for all devices
-- Intuitive tab-based navigation
+- Clean, modern dark theme with cyan/blue/purple gradients
+- Optimized responsive layout for all devices
+- Intuitive step-based navigation workflow
 - Interactive visualizations (tree + graph)
 - Real-time feedback and loading states
 - Professional metrics dashboard
+- Excellent space utilization
 
 ### 5. **Code Quality** ⭐⭐⭐⭐⭐
 - Modular architecture (separation of concerns)
@@ -578,7 +625,7 @@ test_ros_package/
 ### Initialize Repository
 
 ```bash
-# Initialize git
+# Initialize git (if not already done)
 git init
 git add .
 git commit -m "Initial commit: ROS Code Intelligence Platform"
@@ -587,6 +634,19 @@ git commit -m "Initial commit: ROS Code Intelligence Platform"
 git remote add origin https://github.com/HaifaJendoubi/ros-code-intelligence-platform.git
 git branch -M main
 git push -u origin main
+```
+
+### Update Existing Repository
+
+```bash
+# Stage all changes
+git add .
+
+# Commit with descriptive message
+git commit -m "Update: Optimized frontend with step tracking and improved layout"
+
+# Push to GitHub
+git push origin main
 ```
 
 ### Authentication
@@ -623,7 +683,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - 📧 Email: haifa.jandoubi22@gmail.com
 - 🔗 GitHub: [@HaifaJendoubi](https://github.com/HaifaJendoubi)
 - 💼 LinkedIn: [Haifa Jendoubi](https://www.linkedin.com/in/haifa-jendoubi-70b2a61b4/)
-- 📅 Project Date: January 31, 2026
+- 📅 Project Date: January 2026
 
 ---
 
@@ -632,6 +692,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - ROS community for excellent documentation
 - React and FastAPI teams for amazing frameworks
 - Open source contributors worldwide
+- Tailwind CSS for the utility-first approach
+- Lucide for beautiful open-source icons
 
 ---
 
