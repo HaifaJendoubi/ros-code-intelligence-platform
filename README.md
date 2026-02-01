@@ -107,11 +107,7 @@ Smart detection of common ROS anti-patterns:
 
 ## 📸 Screenshots
 
-### Main Interface - Optimized Layout
-![Application Navigation](./screenshots/app-navigation-optimized.png)
-*Compact sidebar with step tracking and progress indicators*
-
-### Upload Interface
+### Main Interface - Upload Interface 
 ![Upload Screen](./screenshots/upload-interface.png)
 *Modern drag-and-drop interface with workflow guide*
 
