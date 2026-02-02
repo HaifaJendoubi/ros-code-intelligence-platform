@@ -91,7 +91,7 @@ Smart detection of common ROS anti-patterns:
 - Animated edges showing data flow
 - Node type color coding (ROS nodes vs. Topics)
 
-### 🎨 **Modern UI/UX** (Updated!)
+### 🎨 **Modern UI/UX** 
 - **Optimized compact layout** - Better space utilization
 - **Step-by-step progress tracking** (Step 1/4, 2/4, 3/4, 4/4)
 - **Visual progress bar** with smooth animations
