@@ -1,5 +1,7 @@
 # backend/app/parsers.py
 """
+ROS project parser - version adaptée pour détecter chatter + talker/listener
+Évite UnboundLocalError et gère mieux les doublons de nœuds
 """
 
 import ast
