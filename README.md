@@ -534,12 +534,16 @@ ros_move_base_action_master/
 > Publication de tâches LTL → réception et planification → appel à move_base via action client."
 
 **Key Findings:**
-
 -✅ Navigation and task-planning integration
+
 -✅ Topics ltl_task (String) and amcl_pose (PoseWithCovarianceStamped)
+
 -✅ Action client detected for move_base
+
 -✅ Launch file for coordinated startup
+
 -⚠️ No Rate used in some nodes → potential CPU overuse
+
 -⚠️ Duplication between source nodes and launch files
 
 **Captures d'écran :**
