@@ -484,7 +484,7 @@ ros-code-intelligence-platform/
 
 | Metric | Count |
 |--------|-------|
-| **Nodes** | 2 |
+| **Nodes** | 3 |
 | **Topics** | 1 |
 | **Publishers** | 1 |
 | **Subscribers** | 1 |
