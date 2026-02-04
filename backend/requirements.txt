@@ -1,27 +1,35 @@
-# Async file operations
+# Core Framework
+fastapi==0.128.0                # Décembre 2025 – bonne gestion async + UploadFile
+
+uvicorn[standard]==0.27.0       # Stable ASGI server
+
+# Async file operations – critique pour gros fichiers ZIP sans OOM
 aiofiles==25.1.0
-annotated-doc==0.0.4
-annotated-types==0.7.0
-anyio==4.12.1
-click==8.3.1
-colorama==0.4.6
-fastapi==0.128.0
-h11==0.16.0
-idna==3.11
-pydantic_core==2.41.5
-starlette==0.50.0
-typing-inspection==0.4.2
-typing_extensions==4.15.0
-# FastAPI and ASGI server
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-python-multipart==0.0.6
-# Data validation
-pydantic==2.5.3
+anyio==4.12.1                   # Résout bugs streaming sur gros uploads multipart
+
+# Multipart parsing (obligatoire pour UploadFile)
+python-multipart==0.0.6         # Version sûre et stable
+
+# Data Validation & Settings – versions alignées avec FastAPI 0.128+
+pydantic>=2.9.2,<3.0.0          # ≥2.9 recommandé pour Python 3.13 + compat FastAPI
 pydantic-settings==2.1.0
-# Python environment
+typing_extensions==4.15.0       # Pour annotations modernes
+
+# HTTP & Utils
+httpx==0.26.0
+idna==3.11
+h11==0.16.0
+
+# Environment
 python-dotenv==1.0.0
-# Development
+
+# Starlette explicite (utile pour debug middlewares)
+starlette==0.50.0               # Compatible avec FastAPI 0.128
+
+# Development & Testing
 pytest==7.4.4
 pytest-asyncio==0.23.3
-httpx==0.26.0
+
+# Optionnels utiles (logs Windows, etc.)
+colorama==0.4.6
+click==8.3.1
