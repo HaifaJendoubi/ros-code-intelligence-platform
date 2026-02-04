@@ -469,7 +469,7 @@ ros-code-intelligence-platform/
 
 
 
-### Test Package : Talker-Listener (Classic ROS Tutorial)
+### Test Package 1 : Talker-Listener (Classic ROS Tutorial)
 
 **Package Structure:**
 ```
@@ -500,6 +500,57 @@ ros-code-intelligence-platform/
 - ✅ Launch file for easy system startup
 - ✅ Timer-based publishing variant included
 - ✅ Minimal, educational codebase
+
+---
+
+### Test Package 2 : Move Base Action + Task Planner Integration
+
+**Package Structure:**
+```
+ros_move_base_action_master/
+├── src/
+│   ├── task_publisher.py
+│   ├── plan_service.py
+│   ├── move_action_service.py
+│   └── next_move_planner_server.py
+├── launch/
+│   └── move_navi.launch
+└── ...
+```
+**Analysis Results:**
+
+| Metric        | Count |
+|---------------|-------|
+| **Nodes**     | 4     |
+| **Topics**    | 2     |
+| **Publishers**| 1     |
+| **Subscribers**| 2    |
+| **Services**  | 0     |
+| **Parameters**| 0     |
+
+**Behavior Summary:**
+
+> "Pattern publisher-subscriber + client action.  
+> Publication de tâches LTL → réception et planification → appel à move_base via action client."
+
+**Key Findings:**
+
+-✅ Navigation and task-planning integration
+-✅ Topics ltl_task (String) and amcl_pose (PoseWithCovarianceStamped)
+-✅ Action client detected for move_base
+-✅ Launch file for coordinated startup
+-⚠️ No Rate used in some nodes → potential CPU overuse
+-⚠️ Duplication between source nodes and launch files
+
+**Captures d'écran :**
+
+### Analysis Dashboard
+![Analysis Results 2](./screenshots/analysis-results1.png)
+*Comprehensive metrics showing ROS concepts at a glance*
+
+### Communication Graph
+![Communication Graph 2](./screenshots/communication-graph1.png)
+*Visual representation of ROS node interactions*
 
 ---
 
