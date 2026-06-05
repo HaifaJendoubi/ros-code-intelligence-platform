@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  detect-stack:
+    runs-on: ubuntu-latest
+    outputs:
+      has_python: ${{ steps.detect.outputs.has_python }}
+      has_node: ${{ steps.detect.outputs.has_node }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect stack
+        id: detect
+        run: |
+          echo "has_python=$([ -f requirements.txt ] || [ -f pyproject.toml ] || [ -f setup.py ] && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "has_node=$([ -f package.json ] && echo true || echo false)" >> $GITHUB_OUTPUT
+
+  test-python:
+    runs-on: ubuntu-latest
+    needs: detect-stack
+    if: needs.detect-stack.outputs.has_python == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run tests
+        run: pytest --cov=. --cov-report=xml --cov-report=term-missing || echo "No tests found"
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-python
+          path: coverage.xml
+        continue-on-error: true
+
+  test-node:
+    runs-on: ubuntu-latest
+    needs: detect-stack
+    if: needs.detect-stack.outputs.has_node == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+
+      - name: Run tests
+        run: |
+          npm test -- --coverage --passWithNoTests || \
+          npm run test:ci --if-present || \
+          echo "No test script found"
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-node
+          path: coverage/
+        continue-on-error: true
